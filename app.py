@@ -4,13 +4,10 @@ from flask import Flask, render_template, redirect, url_for, request
 
 import mysql.connector
 
+from Code.Account import Account
+
 # Connection string
-connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Tamer2006",
-    database="SecureApp"
-)
+
 
 
 app = Flask(__name__)
@@ -33,23 +30,18 @@ def create_account():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Add your account creation logic here (save credentials)
-        return redirect(url_for('index'))  # Redirect back to home after creating account
+        accounts = Account.executeQuery("SELECT Username FROM SecureApp.Users WHERE Username = %s", values=[username])
+        if not accounts:
+            Account.create_account(username, password)
+            return redirect(url_for('index'))
+        else:
+            return redirect(url_for('create_account'))
+
+         # Redirect back to home after creating account
     return render_template('create_account.html')
 
 
-def executeQuery(query,values = None):
-    cursor = connection.cursor()
-    if values is None:
-        cursor.execute(query)
-        result = cursor.fetchall()
-    else:
-        cursor.execute(query,values)
-        result = cursor.fetchall()
 
-    connection.commit()
-    cursor.close()
-    return result
 
 
 
