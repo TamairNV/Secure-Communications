@@ -13,12 +13,15 @@ class Account:
         return f"Name:{self.name}\nPublic Key:{self.public_key}"
 
     @staticmethod
-    def create_account(name,plain_password):
+    def create_account(name,plain_password, public_key):
         Account.executeQuery("INSERT into SecureApp.Users(Username) VALUES(%s)",values=[name])
         accountID = Account.executeQuery("SELECT ID from SecureApp.Users WHERE Username = %s",values=[name])[0][0]
-        password = Password(plain_password)
+        password = Password(public_key)
+        password.init_password(plain_password)
         Account.executeQuery("INSERT into SecureApp.Passwords(UserID,HashedPassword,Salt,PublicKey) "
-                             "VALUES(%s,%s,%s,%s)", values=(accountID,password.hashed_password,password.salt,password.get_public_key()))
+                             "VALUES(%s,%s,%s,%s)", values=(accountID,password.hashed_password,password.salt,public_key))
+
+
 
 
     @staticmethod

@@ -1,59 +1,85 @@
 
 import bcrypt
 import gnupg
+import os
 
 class Password:
-    def __init__(self,plain_text_password,salt = None, hashed_Password = None,key = None):
-        self.gpg = gnupg.GPG()
-        # Generate a salt and hash the password using bcrypt
-        if salt is None and hashed_Password is None and key is None:
-            self.salt = bcrypt.gensalt()
-            self.hashed_password = bcrypt.hashpw(plain_text_password.encode(), self.salt)
-            self.key = self.generate_key_pair(plain_text_password)
-            #self.export_keys(plain_text_password)
-        else:
-            self.salt = salt
-            self.hashed_password = hashed_Password
-            self.key = key
+    def __init__(self,public_key):
+        self.hashed_password = None
+        self.salt = None
+        self.publicKey = public_key
+        self.gpg = gnupg.GPG(use_agent=False)
+        self.store_public_key = Password.read_public_key()
+        print(self.generate_certificate())
+
+
 
     def __str__(self):
         return f"Hashed Password:{self.hashed_password}\nSalt:{self.salt}\n Key figure Print:{self.key}"
 
-    def check_password(self, plain_text_password, hashed_password):
+    def check_password(self, plain_text_password):
         # Validate a password against the stored hash
-        return bcrypt.hashpw(plain_text_password.encode(), self.salt) == hashed_password
+        return bcrypt.hashpw(plain_text_password.encode(), self.salt) == self.hashed_password
 
-    def generate_key_pair(self,password):
-        # Generate GPG public/private key pair
-        input_data = self.gpg.gen_key_input(
-            name_real="name",
-            name_email="email",
-            passphrase=password
+    def init_password(self,plain_text_password):
+        self.salt = bcrypt.gensalt()
+        self.hashed_password = bcrypt.hashpw(plain_text_password.encode(), self.salt)
+
+    def load_password(self,salt,hashed_password):
+        self.salt = salt
+        self.hashed_password = hashed_password
+
+    def encrypt(self, plain_text_password):
+
+        # Import the public key string temporarily
+        import_result = self.gpg.import_keys(self.publicKey)
+
+        # Extract the first fingerprint (or key ID) from the import result
+        fingerprint = import_result.fingerprints[0]
+
+        # Perform encryption using the fingerprint of the imported key
+        encrypted_data = self.gpg.encrypt(plain_text_password, fingerprint, always_trust=True)
+        # Return the encrypted data as a string
+        return str(encrypted_data)
+
+    def generate_certificate(self,message):
+        import_result = self.gpg.import_keys(Password.read_private_key())
+        fingerprint = import_result.fingerprints[0]
+        signed_message = self.gpg.sign(
+            message,
+            default_key =fingerprint,
         )
-        key = self.gpg.gen_key(input_data)
-        return str(key)
 
-    def export_keys(self, output_dir="keys/"):
-        # Export public and private keys to files
-        with open(f"{output_dir}public_key.asc", "w") as pub_file:
-            pub_file.write(self.gpg.export_keys(self.key))
-        with open(f"{output_dir}private_key.asc", "w") as priv_file:
-            priv_file.write(self.gpg.export_keys(self.key, True))
 
-    def get_public_key(self):
-        return self.gpg.export_keys(str(self.key))
+        return signed_message
+
+    @staticmethod
+    def read_private_key():
+        key_file_path = './private_key.pem'  # Path to your private key file
+
+        # Check if the file exists
+        if os.path.exists(key_file_path):
+            with open(key_file_path, 'r') as key_file:
+                private_key = key_file.read()
+                return private_key
+        else:
+            raise FileNotFoundError("Private key file not found!")
+
+    @staticmethod
+    def read_public_key():
+        key_file_path = './public_key.pem'  # Path to your private key file
+
+        # Check if the file exists
+        if os.path.exists(key_file_path):
+            with open(key_file_path, 'r') as key_file:
+                private_key = key_file.read()
+                return private_key
+        else:
+            raise FileNotFoundError("Private key file not found!")
 
 
 
 # Example usage
 if __name__ == "__main__":
-    sp = Password("Tamer2006")
-    print(sp)
-    # Verify the password
-    is_valid = sp.check_password("Tamer2006", sp.hashed_password)
-    print("Password Valid:", is_valid)
-
-    # Generate GPG key pair
-
-    print("Key Pair Generated:", sp.key)
+    pass
 
