@@ -1,0 +1,28 @@
+/* Reset default margin and padding */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0; /* Light gray background */
+}
+
+/* Center the h1 element */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+}
+
+/* Style the h1 element */
+h1 {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 20px 40px; /* Padding inside the box */
+    font-size: 0.5rem; /* Large font size */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    text-align: center; /* Center text horizontally */
+    border: 2px solid #45a049; /* Slightly darker green border */
+}

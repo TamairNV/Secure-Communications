@@ -1,6 +1,9 @@
 
 import mysql.connector
 from Code.Password import Password
+from flask import Flask, render_template, redirect, url_for, request
+import os
+
 
 class Account:
 
@@ -20,7 +23,6 @@ class Account:
         password.init_password(plain_password)
         Account.executeQuery("INSERT into SecureApp.Passwords(UserID,HashedPassword,Salt,PublicKey) "
                              "VALUES(%s,%s,%s,%s)", values=(accountID,password.hashed_password,password.salt,public_key))
-
 
 
 

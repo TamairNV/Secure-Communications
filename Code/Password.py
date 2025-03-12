@@ -10,7 +10,8 @@ class Password:
         self.publicKey = public_key
         self.gpg = gnupg.GPG(use_agent=False)
         self.store_public_key = Password.read_public_key()
-        print(self.generate_certificate())
+
+
 
 
 
@@ -28,6 +29,8 @@ class Password:
     def load_password(self,salt,hashed_password):
         self.salt = salt
         self.hashed_password = hashed_password
+
+
 
     def encrypt(self, plain_text_password):
 
