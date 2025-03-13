@@ -24,6 +24,19 @@ class Account:
         Account.executeQuery("INSERT into SecureApp.Passwords(UserID,HashedPassword,Salt,PublicKey) "
                              "VALUES(%s,%s,%s,%s)", values=(accountID,password.hashed_password,password.salt,public_key))
 
+    @staticmethod
+    def get_user_salt(user_id):
+        salt = Account.executeQuery("SELECT Salt from SecureApp.Users WHERE UserID = %s", values=[user_id])
+        if not salt:
+            return -1
+        return salt[0][0]
+
+    @staticmethod
+    def add_friend(user_id,friend_id):
+        pass
+
+    @staticmethod
+    def request_friend(self):
 
 
     @staticmethod

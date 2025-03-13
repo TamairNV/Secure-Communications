@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+    <link rel="stylesheet" href="../static/Messenger.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar for chat list -->
+        <div class="sidebar">
+            <h2>Chats</h2>
+            <ul id="chat-list">
+                <!-- Dynamically populate chats using Jinja2 -->
+                {% for chat in user_chats %}
+                    <li>
+                        <a href="{{ url_for('view_chat', chat_id=chat.ChatID) }}">{{ chat.ChatName }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Main content for messages and input -->
+        <div class="main-content">
+            <!-- Message display area -->
+            <div class="message-display" id="message-display">
+                <!-- Dynamically populate messages using Jinja2 -->
+                {% if selected_chat %}
+                    {% for message in chat_messages %}
+                        <div class="message">
+                            <span class="timestamp">{{ message.Timestamp }}</span>
+                            <p>{{ message.EncryptedText }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Select a chat to view messages.</p>
+                {% endif %}
+            </div>
+
+            <!-- Input area -->
+            <div class="input-area">
+                <form action="{{ url_for('send_message') }}" method="POST">
+                    <textarea id="message-input" name="message" placeholder="Enter your message..." required></textarea>
+                    <input type="hidden" name="chat_id" value="{{ selected_chat.ChatID if selected_chat else '' }}">
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,13 +1,20 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python-Generated Text</title>
+    <title>PGP Message Display</title>
     <link rel="stylesheet" href="../static/public_key_verification.css">
 </head>
 <body>
-
-    <h1>{{ text }}</h1>
+    <div class="container">
+        <p class="message-text">Here is your encrypted PGP message:</p>
+        <div class="pgp-box">
+            <pre id="pgp-message">{{ text }}</pre>
+        </div>
+        <p class="copy-instruction">Select the text above and copy it manually.</p>
+    </div>
 </body>
 </html>

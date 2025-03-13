@@ -1,28 +1,52 @@
-/* Reset default margin and padding */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0; /* Light gray background */
-}
-
-/* Center the h1 element */
-.container {
+    background-color: #f4f4f4;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Full viewport height */
+    height: 100vh;
+    margin: 0;
 }
 
-/* Style the h1 element */
-h1 {
-    background-color: #4CAF50; /* Green background */
-    color: white; /* White text */
-    padding: 20px 40px; /* Padding inside the box */
-    font-size: 0.5rem; /* Large font size */
-    border-radius: 10px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-    text-align: center; /* Center text horizontally */
-    border: 2px solid #45a049; /* Slightly darker green border */
+.container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.message-text {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.pgp-box {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: monospace;
+    margin: 0;
+}
+
+#copy-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#copy-button:hover {
+    background-color: #0056b3;
 }

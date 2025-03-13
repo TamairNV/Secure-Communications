@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Friends</title>
+    <link rel="stylesheet" href="../static/friendRequestPage.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Find Friends</h1>
+
+        <!-- Search box for finding friends -->
+        <form action="{{ url_for('find_friends') }}" method="POST">
+            <label for="search_query">Search for friends:</label>
+            <input type="text" id="search_query" name="search_query" placeholder="Enter a name or username...">
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Display search results -->
+        <div class="search-results">
+            <h2>Search Results</h2>
+            {% if search_results %}
+                <ul>
+                    {% for user in search_results %}
+                        <li>
+                            <span>{{ user.Username }}</span>
+                            <form action="{{ url_for('send_friend_request') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="friend_id" value="{{ user.ID }}">
+                                <button type="submit">Send Friend Request</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No results found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Link back to the home page -->
+        <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
+    </div>
+</body>
+</html>
