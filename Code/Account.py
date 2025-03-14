@@ -33,10 +33,34 @@ class Account:
 
     @staticmethod
     def add_friend(user_id,friend_id):
-        pass
+        query = "INSERT INTO SecureApp.Friend(User_ID,Friend_ID) VALUES(%s,%s)"
+        Account.executeQuery(query,values=[user_id,friend_id])
+        Account.executeQuery(query,values=[friend_id,user_id])
+        query = "DELETE FROM SecureApp.FriendRequest WHERE Sender_ID = %s AND User_ID = %s"
+        Account.executeQuery(query,values=[friend_id,user_id])
 
     @staticmethod
-    def request_friend(self):
+    def reject_request(user_id, friend_id):
+        query = "DELETE FROM SecureApp.FriendRequest WHERE Sender_ID = %s AND User_ID = %s"
+        Account.executeQuery(query,values=[friend_id,user_id])
+
+    @staticmethod
+    def request_friend(user_id, friend_id):
+        # Check if a friend request or friendship already exists
+        check_query = """
+        SELECT * FROM SecureApp.FriendRequest 
+        WHERE (Sender_ID = %s AND User_ID = %s) 
+           OR (Sender_ID = %s AND User_ID = %s)
+        """
+        existing_request = Account.executeQuery(check_query, [user_id, friend_id, friend_id, user_id])
+
+        if existing_request:
+            return False  # A friend request or friendship already exists
+
+        # If no existing request or friendship, insert the new friend request
+        insert_query = "INSERT INTO SecureApp.FriendRequest (Sender_ID, User_ID) VALUES (%s, %s)"
+        Account.executeQuery(insert_query, [user_id, friend_id])
+        return True  # Friend request successfully sent
 
 
     @staticmethod
@@ -48,7 +72,6 @@ class Account:
             password="Tamer2006",
             database="SecureApp"
         )
-
         cursor = connection.cursor()
         if values is None:
             cursor.execute(query)
@@ -61,6 +84,38 @@ class Account:
         cursor.close()
         return result
 
+
+    @staticmethod
+    def get_all_friend_requests(user_id):
+        query = """
+        SELECT 
+            FriendRequest.Sender_ID, 
+            FriendRequest.Status, 
+            Users.Username
+        FROM 
+            SecureApp.FriendRequest
+        JOIN 
+            SecureApp.Users ON FriendRequest.Sender_ID = Users.ID
+        WHERE 
+            FriendRequest.User_ID = %s
+           
+        ORDER BY 
+            FriendRequest.Timestamp DESC 
+        LIMIT 1
+        """
+        return Account.executeQuery(query, [user_id])
+
+    @staticmethod
+    def get_all_chats(user_id):
+        query = """
+        SELECT Chat.ID, Chat.Name, Chat.owner_id 
+        FROM SecureApp.Chat 
+        JOIN SecureApp.ChatUser ON Chat.ID = ChatUser.ChatID 
+        WHERE ChatUser.UserID = %s;
+        """
+        chats = Account.executeQuery(query, [user_id])
+
+        return chats
 
 
 

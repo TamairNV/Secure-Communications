@@ -11,7 +11,7 @@
         <h1>Find Friends</h1>
 
         <!-- Search box for finding friends -->
-        <form action="{{ url_for('find_friends') }}" method="POST">
+        <form action="{{ url_for('Messenger.search_query') }}" method="POST">
             <label for="search_query">Search for friends:</label>
             <input type="text" id="search_query" name="search_query" placeholder="Enter a name or username...">
             <button type="submit">Search</button>
@@ -24,9 +24,9 @@
                 <ul>
                     {% for user in search_results %}
                         <li>
-                            <span>{{ user.Username }}</span>
-                            <form action="{{ url_for('send_friend_request') }}" method="POST" style="display:inline;">
-                                <input type="hidden" name="friend_id" value="{{ user.ID }}">
+                            <span>{{ user[1] }}</span>
+                            <form action="{{ url_for('Messenger.send_friend_request') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="friend_id" value="{{ user[0] }}">
                                 <button type="submit">Send Friend Request</button>
                             </form>
                         </li>
@@ -37,8 +37,7 @@
             {% endif %}
         </div>
 
-        <!-- Link back to the home page -->
-        <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
+
     </div>
 </body>
 </html>

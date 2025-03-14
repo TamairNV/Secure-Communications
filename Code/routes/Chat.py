@@ -2,19 +2,22 @@ import gnupg
 
 import datetime
 
+import mysql.connector
+
 from Code.Account import Account
+from Code.Password import Password
 
 
 class Chat:
     @staticmethod
     def createChat(name,owner):
-        query = "SELECT Name FROM Chat WHERE Owner_ID = %s"
-        all_Names = Account.executeQuery(query,owner)
+        query = "SELECT Name FROM chat WHERE Owner_ID = %s"
+        all_Names = Account.executeQuery(query,[owner])
         if name in all_Names:
             return False
 
-        query = "INSERT INTO chats (Name) VALUES (%s)"
-        Account.executeQuery(query,[name])
+        query = "INSERT INTO chat (Name,owner_id) VALUES (%s,%s)"
+        Account.executeQuery(query,[name,owner])
 
         return True
 
@@ -26,6 +29,9 @@ class Chat:
         if ID:
             query = "INSERT INTO chatuser (UserID,ChatID,PermissionLevel) VALUES (%s,%s,%s)"
             Account.executeQuery(query,[member,ID,permission])
+
+            query = "INSERT INTO chatuser (UserID,ChatID,PermissionLevel) VALUES (%s,%s,%s)"
+            Account.executeQuery(query,[owner,ID,'owner'])
             return True
 
         return False
@@ -33,12 +39,14 @@ class Chat:
     @staticmethod
     def get_user_chats(user_id):
         query = """
-        SELECT c.ID AS ChatID, c.Name AS ChatName
-        FROM ChatUser cu
-        JOIN Chat c ON cu.ChatID = c.ID
-        WHERE cu.UserID = %s;
+            SELECT Chat.ID, Chat.Name, Chat.owner_id 
+            FROM SecureApp.Chat
+            JOIN SecureApp.ChatUser
+            ON Chat.ID = ChatUser.ChatID
+            WHERE ChatUser.UserID = %s;
         """
         result = Account.executeQuery(query, [user_id])
+
         return result
 
 
@@ -50,7 +58,7 @@ class ChatMember:
         username = Account.executeQuery(query,[user_id])[0][0]
         self.username = username
         self.permission_level = permission_level
-        self.createChatMember()
+
 
     @staticmethod
     def get_chat_messages(chat_id, user_id):
@@ -66,9 +74,13 @@ class ChatMember:
         return result
 
 
+
+
+
+
     @staticmethod
     def sendMessage(chat_id,user_id,_message):
-        new_message = message(_message,chat_id,user_id)
+        new_message = Message(_message,chat_id,user_id)
         new_message.send_message()
 
 
@@ -77,7 +89,7 @@ class ChatMember:
         query = "SELECT m.ID AS MessageID, m.Timestamp, em.EncryptedText FROM Message m JOIN EncryptedMessage em ON m.ID = em.MessageID JOIN ChatUser cu ON em.ChatUserID = cu.ID WHERE m.ChatID = %s   AND cu.UserID = %s;"
         Account.executeQuery(query,)
 
-class message:
+class Message:
     def __init__(self,message,chat_id,sender_id):
         self.gpg = gnupg.GPG()
         self.messages = []
@@ -89,18 +101,19 @@ class message:
 
         public_keys = self.get_public_keys()
         for key in public_keys:
-            self.encrypted_messages.append(self.gpg.encrypt(message,key))
+            self.encrypted_messages.append(Password.encrypt(message,key))
 
 
 
     def get_public_keys(self):
         public_keys = []
-        query =" SELECT u.ID FROM ChatUser cu JOIN Users u ON cu.UserID = u.ID WHERE cu.ChatID = %s;"
-        users_sent_to = Account.executeQuery(query,[self.chat_id])[0]
+        query ="SELECT Users.ID FROM SecureApp.ChatUser JOIN SecureApp.Users ON ChatUser.UserID = Users.ID WHERE ChatUser.ChatID = %s;"
+        self.users_sent_to = Account.executeQuery(query,[self.chat_id])
 
-        for user in users_sent_to:
-            query = "SELECT PublicKey FROM users WHERE id = %s"
-            public_key = Account.executeQuery(query, [user])[0][0]
+
+        for user in self.users_sent_to:
+            query = "SELECT PublicKey FROM SecureApp.Passwords WHERE UserID = %s"
+            public_key = Account.executeQuery(query, [user[0]])[0][0]
             public_keys.append(public_key)
         return public_keys
 
@@ -108,22 +121,36 @@ class message:
 
 
     def send_message(self):
-        query ="INSERT INTO Message (ChatID, ChatUserID) VALUES (%s, %s)"
-        Account.executeQuery(query,[self.chat_id, self.sender_id])
+        print(self.chat_id,self.sender_id)
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Tamer2006",
+            database="SecureApp"
+        )
+        cursor = connection.cursor()
 
-        query = "SELECT LAST_INSERT_ID()"
-        result = Account.executeQuery(query)
-        message_id = result[0][0]
+        query = "SELECT ID FROM ChatUser WHERE ChatID = %s AND UserID = %s"
+        cursor.execute(query,[self.chat_id,self.sender_id])
+        chat_user_id = cursor.fetchall()[0][0]
+
+        query ="INSERT INTO Message (ChatID, ChatUserID) VALUES (%s, %s)"
+        cursor.execute(query,[self.chat_id,chat_user_id])
+        connection.commit()
+
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        message_id = cursor.fetchall()[0][0]
+        query = "SELECT ID FROM SecureApp.ChatUser WHERE ChatID = %s;"
+        cursor.execute(query,[self.chat_id])
+        chat_user_ids = cursor.fetchall()
+
 
         for i, encrypted_message in enumerate( self.encrypted_messages):
+
             query = "INSERT INTO encryptedmessage (MessageID,ChatUserID,EncryptedText) VALUES (%s, %s, %s)"
-            Account.executeQuery(query,[message_id,self.users_sent_to[i],encrypted_message])
-
-
-
-
-
-
+            cursor.execute(query,[message_id,chat_user_ids[i][0],encrypted_message])
+        connection.commit()
+        cursor.close()
     def encryptMessage(self, plain_text_password, public_key):
 
         # Import the public key string temporarily
@@ -136,3 +163,5 @@ class message:
         encrypted_data = self.gpg.encrypt(plain_text_password, fingerprint, always_trust=True)
         # Return the encrypted data as a string
         return str(encrypted_data)
+
+

@@ -37,17 +37,17 @@ class Password:
         self.hashed_password = hashed_password
 
 
-
-    def encrypt(self, plain_text_password):
-
+    @staticmethod
+    def encrypt(plain_text_password,public_key):
+        gpg = gnupg.GPG()
         # Import the public key string temporarily
-        import_result = self.gpg.import_keys(self.publicKey)
+        import_result = gpg.import_keys(public_key)
 
         # Extract the first fingerprint (or key ID) from the import result
         fingerprint = import_result.fingerprints[0]
 
         # Perform encryption using the fingerprint of the imported key
-        encrypted_data = self.gpg.encrypt(plain_text_password, fingerprint, always_trust=True)
+        encrypted_data = gpg.encrypt(plain_text_password, fingerprint, always_trust=True)
         # Return the encrypted data as a string
         return str(encrypted_data)
 

@@ -64,6 +64,10 @@ button:hover {
     margin-bottom: 10px;
 }
 
+label{
+    color: #2c3e50;
+}
+
 .scrollable-list label {
     display: block;
     padding: 5px 0;

@@ -9,7 +9,9 @@
 <body>
     <div class="container">
         <h1>Create a New Chat</h1>
-        <form action="{{ url_for('create_chat') }}" method="POST">
+
+        <!-- Consolidate all inputs in one form -->
+        <form action="{{ url_for('Messenger.chat_creation') }}" method="POST">
             <!-- Text box for chat name -->
             <label for="chat_name">Chat Name:</label>
             <input type="text" id="chat_name" name="chat_name" required>
@@ -23,14 +25,14 @@
             <div class="scrollable-list">
                 {% for friend in friends %}
                     <label>
-                        <input type="checkbox" name="selected_friends" value="{{ friend.id }}">
-                        {{ friend.name }}
+                        <input type="checkbox" name="selected_friends" value="{{ friend[0] }}">
+                        {{ friend[1] }}
                     </label><br>
                 {% endfor %}
             </div>
 
             <!-- Submit button -->
-            <button type="submit" name="action" value="create_chat">Create Chat</button>
+            <button type="submit" name="action" value="create">Submit</button>
         </form>
     </div>
 </body>

@@ -4,18 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messenger</title>
-    <link rel="stylesheet" href="../static/Messenger.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Messenger.css') }}">
 </head>
 <body>
     <div class="container">
         <!-- Sidebar for chat list -->
         <div class="sidebar">
+            <form action="{{ url_for('Messenger.chat_creation') }}" method="POST">
+                <button type="submit">Chat Creation</button>
+            </form>
+
+                    <form action="{{ url_for('Messenger.friendRequestPage') }}" method="POST">
+                <button type="submit">Create Friend</button>
+            </form>
+
+            <div class="search-results">
+            <h2>Friend Requests</h2>
+            {% if user_requests %}
+                <ul>
+                    {% for requests in user_requests %}
+
+                            <li>
+                                <span>{{ requests[2] }}</span>
+                                {% if requests[1] == 'pending' %}
+                                        <form action="{{ url_for('Messenger.accept_friend_request') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="friend_id" value={{ requests[0] }}>
+                                        <button type="submit">Accept</button>
+                                            </form>
+
+                                        <form action="{{ url_for('Messenger.reject_friend_request') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="friend_id" value={{ requests[0] }}>
+                                        <button type="submit">reject</button>
+
+                                    </form>
+                                {% endif %}
+
+
+                            </li>
+
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No results found.</p>
+            {% endif %}
+        </div>
+
             <h2>Chats</h2>
             <ul id="chat-list">
                 <!-- Dynamically populate chats using Jinja2 -->
                 {% for chat in user_chats %}
                     <li>
-                        <a href="{{ url_for('view_chat', chat_id=chat.ChatID) }}">{{ chat.ChatName }}</a>
+                        <a href="{{ url_for('Messenger.view_chat', chat_id=chat[0]) }}">{{ chat[1] }}</a>
                     </li>
                 {% endfor %}
             </ul>
@@ -29,8 +68,8 @@
                 {% if selected_chat %}
                     {% for message in chat_messages %}
                         <div class="message">
-                            <span class="timestamp">{{ message.Timestamp }}</span>
-                            <p>{{ message.EncryptedText }}</p>
+                            <span class="timestamp">{{ message[1] }}</span>
+                            <p>{{ message[2] }}</p>
                         </div>
                     {% endfor %}
                 {% else %}
@@ -40,8 +79,8 @@
 
             <!-- Input area -->
             <div class="input-area">
-                <form action="{{ url_for('send_message') }}" method="POST">
-                    <textarea id="message-input" name="message" placeholder="Enter your message..." required></textarea>
+                <form action="{{ url_for('Messenger.send_message') }}" method="POST">
+                    <label for="message-input"></label><textarea id="message-input" name="message" placeholder="Enter your message..." required></textarea>
                     <input type="hidden" name="chat_id" value="{{ selected_chat.ChatID if selected_chat else '' }}">
                     <button type="submit">Send</button>
                 </form>
