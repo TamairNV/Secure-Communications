@@ -102,7 +102,6 @@ class Account:
            
         ORDER BY 
             FriendRequest.Timestamp DESC 
-        LIMIT 1
         """
         return Account.executeQuery(query, [user_id])
 

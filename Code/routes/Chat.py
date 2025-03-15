@@ -21,6 +21,8 @@ class Chat:
         query = "INSERT INTO chat (Name,owner_id) VALUES (%s,%s)"
         Account.executeQuery(query,[name,owner])
 
+        Chat.addMember(owner,name,owner,"owner")
+
         return True
 
     @staticmethod
@@ -32,8 +34,6 @@ class Chat:
             query = "INSERT INTO chatuser (UserID,ChatID,PermissionLevel) VALUES (%s,%s,%s)"
             Account.executeQuery(query,[member,ID,permission])
 
-            query = "INSERT INTO chatuser (UserID,ChatID,PermissionLevel) VALUES (%s,%s,%s)"
-            Account.executeQuery(query,[owner,ID,'owner'])
             return True
 
         return False
@@ -96,7 +96,6 @@ class ChatMember:
 
 
 
-        print(results)
         query = "SELECT Username FROM Users WHERE ID = %s"
         username = Account.executeQuery(query,[user_id])[0][0]
 
@@ -112,11 +111,14 @@ class ChatMember:
         for row in results:
             align = 'left'
             if username == row["SenderName"]:
+                username = "You"
                 align = 'right'
+            else:
+                username = row["SenderName"]
 
 
 
-            newRow = (row["MessageID"], row["Timestamp"], base64.b64decode(row["EncryptedText"]).decode('utf-8'),align,profile_pic,row['SenderName'])
+            newRow = (row["MessageID"], row["Timestamp"], base64.b64decode(row["EncryptedText"]).decode('utf-8'),align,profile_pic,username)
 
             decoded_result.append(newRow)
 
@@ -133,10 +135,6 @@ class ChatMember:
         new_message.send_message()
 
 
-    @staticmethod
-    def get():
-        query = "SELECT m.ID AS MessageID, m.Timestamp, em.EncryptedText FROM Message m JOIN EncryptedMessage em ON m.ID = em.MessageID JOIN ChatUser cu ON em.ChatUserID = cu.ID WHERE m.ChatID = %s   AND cu.UserID = %s;"
-        Account.executeQuery(query,)
 
 class Message:
     def __init__(self,message,chat_id,sender_id):

@@ -42,8 +42,10 @@ def chat_creation():
                  WHERE friend.User_ID = %s AND Users.Username LIKE %s;
              """
             filtered_friends = Account.executeQuery(query, [user_id, f"%{search_query}%"])
+            chat_name = request.form.get('chat_name', '')
+
             # Re-render with filtered friends
-            return render_template('chat_creation.html', friends=filtered_friends)
+            return render_template('chat_creation.html', friends=filtered_friends,chat_name = chat_name)
         else:
             # Fetch all friends for the user
             query = """
@@ -55,7 +57,7 @@ def chat_creation():
             friends = Account.executeQuery(query, [user_id])
 
     # Default rendering (GET request or unhandled POST)
-    return render_template('chat_creation.html', friends=friends)
+    return render_template('chat_creation.html', friends=friends,chat_name = "")
 
 
 @Messenger.route('/friendRequestPage', methods=['GET', 'POST'])
@@ -127,8 +129,7 @@ def send_friend_request():
     if not user_id:
         return redirect(url_for('verify_2fa'))
     Account.request_friend(user_id, request.form.get('friend_id'))
-    return render_template('Messenger.html', user_chats=Chat.get_user_chats(user_id),
-                           user_requests=Account.get_all_friend_requests(user_id))
+    return render_template('friendRequestPage.html')
 
 @Messenger.route('/view_chat/<int:chat_id>')
 def view_chat(chat_id):

@@ -10,15 +10,18 @@
 <div class="container">
     <!-- Sidebar for chat list -->
     <div class="sidebar">
+
+    <div class="Create-Buttons">
         <form action="{{ url_for('Messenger.chat_creation') }}" method="POST">
-            <button type="submit">Chat Creation</button>
+            <button type="submit"></button>
         </form>
 
         <form action="{{ url_for('Messenger.friendRequestPage') }}" method="POST">
-            <button type="submit">Create Friend</button>
+            <button type="submit"></button>
         </form>
+    </div>
 
-        <div class="search-results">
+        <div class="friend-requests">
             <h2>Friend Requests</h2>
             {% if user_requests %}
                 <ul>
@@ -47,7 +50,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p>No results found.</p>
+                <p>No Friend Requests.</p>
             {% endif %}
         </div>
 
