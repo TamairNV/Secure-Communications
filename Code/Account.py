@@ -72,7 +72,8 @@ class Account:
             password="Tamer2006",
             database="SecureApp"
         )
-        cursor = connection.cursor()
+        cursor = connection.cursor(buffered=True)
+
         if values is None:
             cursor.execute(query)
             result = cursor.fetchall()

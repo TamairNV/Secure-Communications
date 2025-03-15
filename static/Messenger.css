@@ -68,14 +68,15 @@ li {
 /* Message display area */
 .message-display {
     flex-grow: 1;
-    padding: 20px;
+    padding: 10px;
     overflow-y: auto;
     background-color: white;
     border-bottom: 1px solid #ccc;
 }
 
+
 .message {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .message .timestamp {
@@ -118,3 +119,77 @@ li {
 .input-area button:hover {
     background-color: #0056b3;
 }
+
+
+    .message-box {
+
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 5px;
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+        height: auto;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .timestamp {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .message-content {
+        width: 95%;
+        height: 250px;
+        padding: 10px;
+        margin-bottom: 5%;
+        background-color: #fdfdfd;
+    }
+
+    .message-image {
+        width: 50px; /* Example image size */
+        height: auto;
+        margin-top: 10px;
+    }
+
+    .bin-button {
+        padding: 8px 8px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+
+    }
+
+    .bin-button:hover {
+        background-color: #0056b3;
+    }
+
+    .extra-info {
+        margin-top: 10px;
+        color: #333;
+    }
+
+    .right-aligned .message-content {
+        text-align: right;
+    }
+
+.username{
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.timestamp-button{
+    text-align: left;
+}
+
+
+

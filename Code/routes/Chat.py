@@ -1,3 +1,5 @@
+import base64
+
 import gnupg
 
 import datetime
@@ -62,16 +64,63 @@ class ChatMember:
 
     @staticmethod
     def get_chat_messages(chat_id, user_id):
-        query = """
-        SELECT m.ID AS MessageID, m.Timestamp, em.EncryptedText
-        FROM Message m
-        JOIN EncryptedMessage em ON m.ID = em.MessageID
-        JOIN ChatUser cu ON em.ChatUserID = cu.ID
-        WHERE m.ChatID = %s
-          AND cu.UserID = %s;
-        """
-        result = Account.executeQuery(query, [chat_id, user_id])
-        return result
+
+        # Step 1: Get messages in the chat
+        messages = Account.executeQuery(
+            "SELECT ID, ChatUserID, Timestamp FROM SecureApp.Message WHERE ChatID = %s;",
+            [chat_id]
+        )
+
+        results = []
+        for message in messages:
+            message_id, sender_chatuser_id, timestamp = message
+
+            # Step 2: Get sender's username
+            sender_name = Account.executeQuery(
+                "SELECT u.Username FROM SecureApp.ChatUser cu JOIN SecureApp.Users u ON cu.UserID = u.ID WHERE cu.ID = %s;",
+                [sender_chatuser_id]
+            )[0][0]  # Fetch the first row and column
+
+            # Step 3: Get encrypted message for the recipient
+            encrypted_text = Account.executeQuery(
+                "SELECT EncryptedText FROM SecureApp.EncryptedMessage WHERE MessageID = %s AND ChatUserID = (SELECT ID FROM SecureApp.ChatUser WHERE UserID = %s AND ChatID = %s);",
+                [message_id, user_id, chat_id]
+            )[0][0]  # Fetch the first row and column
+
+            results.append({
+                "MessageID": message_id,
+                "Timestamp": timestamp,
+                "EncryptedText": encrypted_text,
+                "SenderName": sender_name
+            })
+
+
+
+        print(results)
+        query = "SELECT Username FROM Users WHERE ID = %s"
+        username = Account.executeQuery(query,[user_id])[0][0]
+
+        query = "SELECT ProfilePicture FROM Users WHERE ID = %s"
+        try:
+            profile_pic = Account.executeQuery(query,[user_id])[0][0]
+        except:
+            profile_pic = None
+
+
+        # Create a new list with modified tuples
+        decoded_result = []
+        for row in results:
+            align = 'left'
+            if username == row["SenderName"]:
+                align = 'right'
+
+
+
+            newRow = (row["MessageID"], row["Timestamp"], base64.b64decode(row["EncryptedText"]).decode('utf-8'),align,profile_pic,row['SenderName'])
+
+            decoded_result.append(newRow)
+
+        return decoded_result
 
 
 
@@ -101,7 +150,17 @@ class Message:
 
         public_keys = self.get_public_keys()
         for key in public_keys:
-            self.encrypted_messages.append(Password.encrypt(message,key))
+            decoded_key = base64.b64decode(key).decode('utf-8')
+            gpg = gnupg.GPG()
+            import_result = gpg.import_keys(decoded_key)
+            if not import_result.fingerprints:
+                raise ValueError("Invalid public key retrieved from the database.")
+            else:
+                print("good public key")
+            encrypted_message = Password.encrypt(message,decoded_key.replace('\r\n', '\n'))
+            encrypted_message_encoded = base64.b64encode(str(encrypted_message).encode('utf-8')).decode('utf-8')
+
+            self.encrypted_messages.append(encrypted_message_encoded)
 
 
 
@@ -128,11 +187,13 @@ class Message:
             password="Tamer2006",
             database="SecureApp"
         )
-        cursor = connection.cursor()
+        cursor = connection.cursor(buffered=True)
 
         query = "SELECT ID FROM ChatUser WHERE ChatID = %s AND UserID = %s"
         cursor.execute(query,[self.chat_id,self.sender_id])
+
         chat_user_id = cursor.fetchall()[0][0]
+
 
         query ="INSERT INTO Message (ChatID, ChatUserID) VALUES (%s, %s)"
         cursor.execute(query,[self.chat_id,chat_user_id])

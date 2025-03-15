@@ -121,7 +121,14 @@ def search_query():
     print(search_results)
     return render_template('friendRequestPage.html', search_results=search_results)
 
-
+@Messenger.route('/send_friend_request', methods=['GET', 'POST'])
+def send_friend_request():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('verify_2fa'))
+    Account.request_friend(user_id, request.form.get('friend_id'))
+    return render_template('Messenger.html', user_chats=Chat.get_user_chats(user_id),
+                           user_requests=Account.get_all_friend_requests(user_id))
 
 @Messenger.route('/view_chat/<int:chat_id>')
 def view_chat(chat_id):
@@ -130,11 +137,10 @@ def view_chat(chat_id):
         return redirect(url_for('verify_2fa'))
 
     session['chat_id'] = chat_id
-    chat_messages = ChatMember.get_chat_messages(chat_id, user_id)
-    print(chat_messages)
+
 
     return render_template('Messenger.html', user_chats=Chat.get_user_chats(user_id),
-                           user_requests=Account.get_all_friend_requests(user_id),chat_messages = chat_messages,selected_chat = chat_id)
+                           user_requests=Account.get_all_friend_requests(user_id),chat_messages = ChatMember.get_chat_messages(chat_id, user_id),selected_chat = chat_id)
 
 
 @Messenger.route('/send_message',methods=['POST'])

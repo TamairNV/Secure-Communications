@@ -1,3 +1,5 @@
+import base64
+
 from flask import Flask, render_template, redirect, url_for, request, session
 
 from Code.Account import Account
@@ -59,7 +61,7 @@ class App:
 
             passwordData = Account.executeQuery(getPasswordData,values=[userID])[0]
 
-            passwordObj = Password(passwordData[2])
+            passwordObj = Password(base64.b64decode(passwordData[2]).decode('utf-8'))
             passwordObj.load_password(passwordData[1],passwordData[0])
 
             isPasswordCorrect = passwordObj.check_password(password)
@@ -112,13 +114,24 @@ class App:
             username = request.form['username']
             password = request.form['password']
             public_key = request.form['public key']
+            print(public_key)
+            encoded_key = base64.b64encode(public_key.encode('utf-8')).decode('utf-8')
 
             accounts = Account.executeQuery("SELECT Username FROM SecureApp.Users WHERE Username = %s", values=[username])
+
             if not accounts:
-                Account.create_account(username, password,public_key)
+                Account.create_account(username, password,encoded_key)
+                query = "SELECT ID FROM SecureApp.Users WHERE Username = %s"
+                id = Account.executeQuery(query, [username])[0][0]
+
+                query = "SELECT PublicKey FROM SecureApp.Passwords WHERE UserID = %s"
+                key = Account.executeQuery(query, [id])[0][0]
+                decoded_key =  base64.b64decode(key).decode('utf-8')
+                print(decoded_key)
                 return redirect(url_for('index'))
             else:
                 return redirect(url_for('create_account'))
+
 
              # Redirect back to home after creating account
         return render_template('create_account.html')
