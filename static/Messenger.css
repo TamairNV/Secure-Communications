@@ -82,6 +82,7 @@ li {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    scroll-padding-bottom: 0;
     background-color: #ecf0f1;
 }
 
@@ -89,7 +90,10 @@ li {
 .message-display {
     flex-grow: 1;
     padding: 10px;
-    overflow-y: auto;
+    overflow: auto;
+    display: flex;
+    scroll-padding-bottom: 0;
+     flex-direction: column-reverse;
     background-color: white;
     border-bottom: 1px solid #ccc;
 }

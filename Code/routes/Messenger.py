@@ -152,9 +152,8 @@ def send_message():
 
     message_content = request.form.get('message')
     chat_id = session.get('chat_id')
-    print(message_content,chat_id)
     ChatMember.sendMessage(chat_id,user_id,message_content)
     return render_template('Messenger.html', user_chats=Chat.get_user_chats(user_id),
-                           user_requests=Account.get_all_friend_requests(user_id),chat_messages =  ChatMember.get_chat_messages(session.get('chat_id'),user_id))
+                           user_requests=Account.get_all_friend_requests(user_id),chat_messages = ChatMember.get_chat_messages(chat_id, user_id),selected_chat = chat_id)
 
 

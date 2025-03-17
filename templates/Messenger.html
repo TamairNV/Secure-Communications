@@ -26,7 +26,6 @@
             {% if user_requests %}
                 <ul>
                     {% for requests in user_requests %}
-
                         <li>
                             <span>{{ requests[2] }}</span>
                             {% if requests[1] == 'pending' %}
@@ -71,7 +70,7 @@
         <div class="message-display" id="message-display">
             <!-- Dynamically populate messages using Jinja2 -->
             {% if selected_chat %}
-                {% for message in chat_messages %}
+                {% for message in chat_messages|reverse %}
                     <div class="message-box {% if message[3] == 'right' %}right-aligned{% endif %}">
                         <div class="message-header">
                             <div class="username">
