@@ -1,6 +1,6 @@
 import base64
 
-from flask import Flask, render_template, redirect, url_for, request, session
+from flask import Flask, render_template, redirect, url_for, request, session, app
 
 from Code.Account import Account
 from Code.routes.Chat import Chat, ChatMember

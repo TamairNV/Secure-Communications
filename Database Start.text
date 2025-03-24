@@ -1,0 +1,4 @@
+brew services start mariadb
+brew services stop mariadb
+brew services restart mariadb
+
